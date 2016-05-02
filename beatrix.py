@@ -1,10 +1,44 @@
 __author__ = 'vamsi'
 
+import json
+#import postgres_conn
 import operator
-
+from collections import defaultdict
+import requests
 #/home/vamsi/Desktop/taxi_dbms/nyctaxisub.csv
 
 
+def getData_fromDB(pool_size,customers_willing_walk):
+    print('in getdata from db')
+
+def mergeTrips(pool_size,):
+    print('in merge Trips')
+
+
+def getDistance(plat,plong,dlat,dlong):
+    requestString='http://localhost:8989/route?point='+str(plat)+'%2C'+str(plong)+'&point='+str(dlat)+'%2C'+str(dlong)+'&vehicle=car'
+    #print(requestString)
+    #r=requests.get('http://localhost:8989/route?point=41.8789%2C-87.6359&point=41.8916%2C-87.6045&vehicle=car')
+    r=requests.get(requestString)
+
+    res=json.loads(r.text)
+
+    return_list=[]
+    if('paths' in res):
+        return_list.append(res['paths'][0]['distance'])
+        return_list.append(res['paths'][0]['time'])
+        return return_list
+    else:
+        return_list.append(-250)
+        return_list.append(-250)
+        return return_list
+    #http://localhost:8989/route?point=41.8789%2C-87.6359&point=41.8916%2C-87.6045&vehicle=foot&points_encoded=false&instructions=false
+    #http://localhost:8989/info
+
+
+
+
+#Used to label the given points based on different sectors
 def clustering():
     sector1=[(-73.767014,40.639488),
 (-73.729248,40.644699),
@@ -90,41 +124,61 @@ def clustering():
 (-73.723755,40.648866),
 (-73.768387,40.629067)]
 
+    entryMap={} #contains the list of transactions categorized by each sector -> key -> sectornumber; value->list of all transactions for each sector
 
-    sourcedata=open('/home/vamsi/Databases_sqlLite/taxi_extract_2015_yellow_jan_1_sorted.csv','r')
+    for i in range(1,8):
+        sectorID='sector'
+        sectorID=sectorID+str(i)
+        print(sectorID)
+        entryMap.update({sectorID:[]})
+    entryMap.update({'not in New York':[]})
+    sectorlist=[]
+    sectorlist.append("sector1")
+    sectorlist.append("sector2")
+    sectorlist.append("sector3")
+    sectorlist.append("sector4")
+    sectorlist.append("sector5")
+    sectorlist.append("sector6")
+    sectorlist.append("sector7")
+
+    sourcedata=open('/home/vamsi/Databases_sqlLite/taxi_extract_2015_yellow_mar_3_sorted.csv','r')
     for trans in sourcedata:
         x=trans.split(',')
         y1=float(x[9])
         y2=float(x[10])
 
+
+
         if point_in_poly(y1,y2,sector1):
-            print('sector1')
+            entryMap['sector1'].append(trans)
         elif point_in_poly(y1,y2,sector2):
-            print('sector2')
+            entryMap['sector2'].append(trans)
+           # print('sector2')
         elif point_in_poly(y1,y2,sector3):
-            print('sector3')
+            entryMap['sector3'].append(trans)
+            # print('sector3')
         elif point_in_poly(y1,y2,sector4):
-            print('sector4')
+            x=entryMap['sector4']
+            x.append(trans)
+            #print('sector4')
         elif point_in_poly(y1,y2,sector5):
-            print('sector5')
+            entryMap['sector5'].append(trans)
+            #print('sector5')
         elif point_in_poly(y1,y2,sector6):
-            print('sector6')
+            entryMap['sector6'].append(trans)
+            #print('sector6')
         elif point_in_poly(y1,y2,sector7):
-            print('sector7')
+            entryMap['sector7'].append(trans)
+            #print('sector7')
         else :
-            print('not in New York')
+            entryMap['not in New York'].append(trans)
+            #print('not in New York')
+
+    for k,v in entryMap.items():
+        print(k,len(v))
 
 
-
-
-
-
-
-
-
-
-
-
+#not used in the implementation
 def sort_date_time():
     reference=open('/home/vamsi/Documents/Spring2016/DBMS/TaxiSharing/dataset_taxisharing/trip_data_1_output.csv','r')
     output= open('/home/vamsi/Documents/Spring2016/DBMS/TaxiSharing/dataset_taxisharing/trip_data_1_output_sorted.csv','w')
@@ -151,7 +205,7 @@ def sample():
                 break
 
 
-def extract():
+def extract_rides_from_airport():
    i=0
    k=0
    output= open('/home/vamsi/Documents/Spring2016/DBMS/TaxiSharing/dataset_taxisharing/extracts/trip_data_5_output.csv','w')
@@ -228,7 +282,9 @@ def point_in_poly(x,y,poly):
     return inside
 
 
-clustering()
+#x=getDistance(40.639488,-73.767014,40.636362,-73.792419)
+#print(str(x))
+#clustering()
 #extract()
 #sample()
 #sort_date_time()
