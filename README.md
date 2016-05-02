@@ -1,6 +1,7 @@
 #NewYork-Taxi-Ridesharing
 Team-8 submission
 
+
  To run the code locally, please follow these steps:
 
 - Below are the steps to run the source code to perform more trials and conduct simulations for all the algorithms:
@@ -29,6 +30,7 @@ The database related dumps are available from https://drive.google.com/open?id=0
 - Import the downloaded files from Google Drive and uncompress them.Import them into Postgres and SQLite having corresponding names as their file names
 
 - Open the Source folder in any Python IDE configured to Python 3.4.
+- The entry point to the algorithm is at the file- <b>getpandas.py</b> and the method import_dataframes(pool_size) needs to be executed.
 
 - Change the path of the sql file located and also username and password of PostgreSQL database in postgres_conn.py file.
 
